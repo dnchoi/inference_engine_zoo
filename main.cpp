@@ -60,11 +60,11 @@ int main(int argc, char* argv[]){
     SPDLOG_INFO("optimizer : {}", args._engine);
     if(args._engine == "onnx"){
         onnx_frvf::frvf_onnx *onnx;
-        onnx = new onnx_frvf::frvf_onnx("model.onnx", true, 0);
+        onnx = new onnx_frvf::frvf_onnx(rgs._model, true, 0);
         std::vector<float> result;
         float avg_ms = 0.0;
         for(int i = 0; i < 1000; i++){
-            result.push_back(onnx->do_inference("12.png"));
+            result.push_back(onnx->do_inference("img.png"));
         }
         for(int q = 0; q < result.size(); q++)
         {
