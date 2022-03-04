@@ -10,12 +10,10 @@ project(
 add_compile_definitions(_DEBUG_)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
-set(CMAKE_BUILD_TYPE RelWithDebInfo)
+# set(CMAKE_BUILD_TYPE RelWithDebInfo)
 set(CMAKE_CXX_FLAGS -pthread)
 set(CMAKE_CXX_STANDARD 14)
 
-message(STATUS CMAKE_BUILD_TYPE)                     # -- CMAKE_BUILD_TYPE
-message(STATUS ${CMAKE_BUILD_TYPE})                  # -- Debug
 message(STATUS "Configuration: ${CMAKE_BUILD_TYPE}") # -- Configuration: Debug
 message(STATUS "Compiler")
 message(STATUS " - ID       \t: ${CMAKE_CXX_COMPILER_ID}")

@@ -155,14 +155,14 @@ void frvf_onnx::_Instance(std::string file_path, bool useCUDA, int OPT_OPTION)
     ONNXTensorElementDataType outputType = outputTensorInfo.GetElementType();
     outputDims = outputTensorInfo.GetShape();
 
-    SPDLOG_INFO("Number of Input Nodes : {}",numInputNodes);
-    SPDLOG_INFO("Number of Output Nodes : {}",numOutputNodes);
-    SPDLOG_INFO("Input Name : {}",inputName);
-    SPDLOG_INFO("Input Type : {}",inputType);
-    SPDLOG_INFO("Input Dimensions : {} {} {} {}",inputDims[0],inputDims[1],inputDims[2],inputDims[3]);
-    SPDLOG_INFO("Output Name : {}",outputName);
-    SPDLOG_INFO("Output Type : {}",outputType);
-    SPDLOG_INFO("Output Dimensions : {} {} {} {}",outputDims[0],outputDims[1],outputDims[2],outputDims[3]);
+    SPDLOG_TRACE("Number of Input Nodes : {}",numInputNodes);
+    SPDLOG_TRACE("Number of Output Nodes : {}",numOutputNodes);
+    SPDLOG_TRACE("Input Name : {}",inputName);
+    SPDLOG_TRACE("Input Type : {}",inputType);
+    SPDLOG_TRACE("Input Dimensions : {} {} {} {}",inputDims[0],inputDims[1],inputDims[2],inputDims[3]);
+    SPDLOG_TRACE("Output Name : {}",outputName);
+    SPDLOG_TRACE("Output Type : {}",outputType);
+    SPDLOG_TRACE("Output Dimensions : {} {} {} {}",outputDims[0],outputDims[1],outputDims[2],outputDims[3]);
 
     inputNames.push_back(inputName);
     outputNames.push_back(outputName);
@@ -226,17 +226,29 @@ void frvf_onnx::_Instance(std::string file_path, bool useCUDA, int OPT_OPTION)
 #endif
 }
 
-float frvf_onnx::do_inference(std::string imageFilepath){
-    cv::Mat imageBGR2= cv::Mat::zeros(1, 1, CV_64F);
-    cv::Mat imageBGR = cv::imread(imageFilepath, cv::ImreadModes::IMREAD_COLOR);
-    cv::Mat resizedImageBGR, resizedImageRGB, resizedImage, preprocessedImage;
-    cv::resize(imageBGR, resizedImageBGR,
-               cv::Size(inputDims.at(2), inputDims.at(3)),
-               cv::InterpolationFlags::INTER_CUBIC);
-    cv::cvtColor(resizedImageBGR, resizedImageRGB,
-                 cv::ColorConversionCodes::COLOR_BGR2RGB);
-    resizedImageRGB.convertTo(resizedImage, CV_32F, 1.0 / 255);
+float frvf_onnx::do_inference(int B, int C, int W, int H, std::string imageFilepath){
+    assert((int64_t)W == inputDims.at(2));
+    assert((int64_t)H == inputDims.at(3));
 
+    cv::Mat resizedImageBGR, resizedImageRGB, resizedImage, preprocessedImage;
+    if(imageFilepath.find(".") == std::string::npos){
+        cv::Mat channels[C], imageBGR;
+        for(int num = 0; num < C; num++){
+            channels[num] = cv::Mat::zeros(W, H, CV_32F);
+        }
+        cv::merge(channels, C, imageBGR);
+
+        imageBGR.convertTo(resizedImage, CV_32F, 1.0 / 255);
+    }
+    else{        
+        cv::Mat imageBGR = cv::imread(imageFilepath, cv::ImreadModes::IMREAD_COLOR);
+        cv::resize(imageBGR, resizedImageBGR,
+                cv::Size(inputDims.at(2), inputDims.at(3)),
+                cv::InterpolationFlags::INTER_CUBIC);
+        cv::cvtColor(resizedImageBGR, resizedImageRGB,
+                    cv::ColorConversionCodes::COLOR_BGR2RGB);
+        resizedImageRGB.convertTo(resizedImage, CV_32F, 1.0 / 255);
+    }
     // cv::Mat channels[3];
     // cv::split(resizedImage, channels);
     // // Normalization per channel
@@ -285,6 +297,20 @@ float frvf_onnx::do_inference(std::string imageFilepath){
     float processtime = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
 
     return processtime;
+}
+
+std::vector<float> frvf_onnx::workspace(int iter, int B, int C, int W, int H, std::string imageFilepath){
+    if(imageFilepath.find(".") == std::string::npos) SPDLOG_INFO("Use Zero matrix");
+    else SPDLOG_INFO("Use image matrix");
+    int i = 0;
+    std::vector<float> processing_time;
+    while(true)
+    {
+        processing_time.push_back(do_inference(B, C, W, H, imageFilepath));
+        i++;
+        if(iter < i) break;
+    }
+    return processing_time;
 }
 
 frvf_onnx::~frvf_onnx(){
