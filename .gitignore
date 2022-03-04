@@ -1,3 +1,4 @@
 .vscode
 *.onnx
 build
+*.log

@@ -1,7 +1,5 @@
 #!/bin/sh
 
-# exit on first error
-
 # commend
 # bash build_run.sh run 0 img
 # bash build_run.sh run 0 img.png
@@ -10,6 +8,9 @@
 # bash build_run.sh build 0 img
 # bash build_run.sh build 0 img.png
 # bash build_run.sh build 1000 img.png
+
+
+# exit on first error
 set -e
 
 input=$1
