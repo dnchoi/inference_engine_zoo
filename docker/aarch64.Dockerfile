@@ -118,7 +118,6 @@ RUN cd /tmp && \
         -DWITH_1394=OFF \
         -DWITH_OPENEXR=OFF \
         -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda \
-        -DCUDNN_LIBRARY=/usr/local/cuda/lib64/libcudnn.so.8.1.1 \
         -DCUDA_ARCH_BIN='6.0 6.2 7.0 7.5' \
         -DCUDA_ARCH_PTX="" \
         -DINSTALL_C_EXAMPLES=ON \
