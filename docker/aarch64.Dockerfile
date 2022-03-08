@@ -58,8 +58,8 @@ ENV LANGUAGE en_US.UTF-8
 
 # Install CMake
 RUN cd /tmp && \
-    wget https://github.com/Kitware/CMake/releases/download/v${CMALE_VERSION}/cmake-${CMALE_VERSION}-linux-x86_64.sh && \
-    bash cmake-${CMALE_VERSION}-linux-x86_64.sh --prefix=/usr/local --exclude-subdir --skip-license
+    wget https://github.com/Kitware/CMake/releases/download/v${CMALE_VERSION}/cmake-${CMALE_VERSION}-linux-aarch64.sh && \
+    bash cmake-${CMALE_VERSION}-linux-aarch64.sh --prefix=/usr/local --exclude-subdir --skip-license
 RUN rm -rf /tmp/*
 
 # Install OpenCV
@@ -135,8 +135,8 @@ RUN cd /tmp && \
     git clone --recursive --branch v${ONNXRUNTIME_VERSION} https://github.com/Microsoft/onnxruntime && \
     cd onnxruntime && \
     ./build.sh \
-        --cuda_home /usr/local/cuda-11.1 \
-        --cudnn_home /usr/lib/x86_64-linux-gnu/ \
+        --cuda_home /usr/local/cuda \
+        --cudnn_home /usr/lib/aarch64-linux-gnu/ \
         --use_cuda \
         --config RelWithDebInfo \
         --build_shared_lib \
