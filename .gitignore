@@ -1,4 +1,5 @@
 .vscode
 *.onnx
 build
-*.log
+log
+*.csv

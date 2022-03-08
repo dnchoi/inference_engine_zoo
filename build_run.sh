@@ -13,23 +13,38 @@
 # exit on first error
 set -e
 
-input=$1
-input2=$2
-input3=$3
-echo $input
-echo $input2
-echo $input3
+BUILD=$1
+BATCH=$2
+C=$3
+W=$4
+H=$5
+ITER=$6
+ACC=$7
+OPTI=$8
+MODEL=$9
+ENGINE=${10}
+IMG=${11}
+
+echo "BUILD or RUN : $BUILD"
+echo "INPUT BATCH SIZE : $BATCH"
+echo "INPUT CHANNEL : $C"
+echo "INPUT WIDTH : $W"
+echo "INPUT HEIGHT : $H"
+echo "ITERATE : $ITER"
+echo "ACCELERATOR : $ACC"
+echo "OPTIMIZER : $OPTI"
+echo "MODEL PATH : $MODEL"
+echo "USING ENGINE : $ENGINE"
+echo "IMAGE PATH : $IMG"
 
 function main {
-    ./build/main 1 3 112 112 1000 1 0 model.onnx onnx $input3
+    ./build/main $BATCH $C $W $H $ITER $ACC $OPTI $MODEL $ENGINE $IMG
 }
 
-if [ $input = "build" ]
+if [ $BUILD = "build" ]
 then
     echo "Build and Run"
-    rm -rf build
-    sleep 2s
-    mkdir build
+
     cd build
 
     # Generate a Makefile for GCC (or Clang, depanding on CC/CXX envvar)
@@ -39,33 +54,16 @@ then
     # cmake --build .
     make all
     cd ..
-    if [ $input2 != 0 ]
-    then
-        for ((i=0;i<=$input2;i++))
-        do
-            main
-            echo "Running loop "$i
 
-        done
-    else
-        echo "One cycle"
-        main
-    fi
-elif [ $input = "run" ]
+    sleep 2s
+    echo "One cycle"
+    main
+elif [ $BUILD = "run" ]
 then
     echo "Run"
-    if [ $input2 != 0 ]
-    then
-        for ((i=0;i<=$input2;i++))
-        do
-            main
-            echo "Running loop "$i
 
-        done
-    else
-        echo "One cycle"
-        main
-    fi
+    echo "One cycle"
+    main
 fi
 
 # args._B = atoi(argv[1]);

@@ -1,13 +1,11 @@
 #include "iostream"
 #include "frvf_onnx.h"
-#include <spdlog/spdlog.h>
 #include "configparser.h"
 #include <unistd.h>
+#include <spdlog/spdlog.h> 
 #include "spdlog/sinks/basic_file_sink.h"
 #include <assert.h>
-
-#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_INFO
-
+#include <fstream>
 
 int main(int argc, char* argv[]){
     /**
@@ -21,8 +19,9 @@ int main(int argc, char* argv[]){
      * 2 = ORT_ENABLE_EXTENDED : To enable extended optimizations(Includes level 1 + more complex optimizations like node fusions)
      * 3 = ORT_ENABLE_ALL : To Enable All possible optimizations
      */
-    
-    // auto file_logger = spdlog::basic_logger_mt("basic_logger", "logs/basic.txt");
+    spdlog::set_level(spdlog::level::debug); 
+
+    // auto file_logger = spdlog::basic_logger_mt("main", "logs/log.log");
     // spdlog::set_default_logger(file_logger);
 
     struct Arg
@@ -34,9 +33,9 @@ int main(int argc, char* argv[]){
         int _iter;
         int _acc;
         int _opti;
-        std::string _model;
-        std::string _engine;
-        std::string _file;
+        char * _model;
+        char * _engine;
+        char * _file;
     };
     
     Arg args;
@@ -76,26 +75,37 @@ int main(int argc, char* argv[]){
     SPDLOG_INFO("optimizer : {}", args._opti);
     SPDLOG_INFO("model path : {}", args._model);
     SPDLOG_INFO("engine : {}", args._engine);
-    SPDLOG_INFO("file name : {}", args._file);
-    if(args._engine == "onnx"){
-        onnx_frvf::frvf_onnx *onnx;
-        onnx = new onnx_frvf::frvf_onnx(args._model, args._acc, args._opti);
+    SPDLOG_INFO("img path : {}", args._file);
+    std::string _engine(args._engine);
+    if(_engine == "onnx"){
 
         try
         {
-            float avg_ms = 0.0;
-            // avg_ms = onnx->do_inference(args._B, args._C, args._W, args._H, "img.png");
-            // SPDLOG_INFO("Pokemon img : {:03.8f}", avg_ms);
-            // sleep(5);
-            
-            // avg_ms = 0.0;
-            std::vector<float> process_vec = onnx->workspace(args._iter, args._B, args._C, args._W, args._H, args._file);
-            for(int q = 0; q < process_vec.size(); q++)
-            {
-                avg_ms += process_vec[q];
+            onnx_frvf::frvf_onnx *onnx;
+            onnx = new onnx_frvf::frvf_onnx(args._model, args._acc, args._opti, args._B, args._C, args._W, args._H, args._file);
+            std::vector<float> avg_ms(0, args._iter);
+
+            for(int num = 0; num < args._iter; num++){
+                float pro_time = onnx->do_inference();
+                avg_ms.push_back(pro_time);
+                SPDLOG_INFO("Iter number : {} / Processing time : {:03.8f}", num, pro_time);
             }
-            avg_ms = avg_ms / 1000.0;
-            SPDLOG_INFO("{} : {:03.8f}", args._file, avg_ms);
+            float average = std::accumulate( avg_ms.begin(), avg_ms.end(), 0.0 ) / avg_ms.size();
+
+            SPDLOG_INFO("{:03.8f} micro / {:03.8f} milli", average, average/1000);
+
+        	std::string filePath = "output.csv";
+
+            std::ofstream writeFile(filePath.data());
+            if( writeFile.is_open() ){
+                writeFile << "BATCH,CHANNEL,WIDTH,HEIGHT,ITERATE,ACCELERATOR,OPTIMIZER,MODEL,ENGINE,FILE,MICRO,MILLI\n";
+                writeFile << args._B << "," << args._C << "," << args._W << "," 
+                          << args._H << "," << args._iter << "," << args._acc << "," 
+                          << args._opti << "," << args._model << "," << args._engine << "," 
+                          << args._file << "," << average << "," << average/1000 << "\n";
+                
+                writeFile.close(); 
+            }
         }
         catch(const std::exception& e)
         {
@@ -106,5 +116,5 @@ int main(int argc, char* argv[]){
     else{
         return 0;
     }
-	return 0;
+    return 0;
 }

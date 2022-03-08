@@ -5,7 +5,7 @@ project(
   LANGUAGES CXX
 )
 message("@@ frvf_onnx CMake Start @@")
-# set(CMAKE_BUILD_TYPE RelWithDebInfo)
+set(CMAKE_BUILD_TYPE RelWithDebInfo)
 set(CMAKE_CXX_STANDARD 14)
 message("This lib name : ${PROJECT_NAME}")
 

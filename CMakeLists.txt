@@ -10,7 +10,7 @@ project(
 add_compile_definitions(_DEBUG_)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
-# set(CMAKE_BUILD_TYPE RelWithDebInfo)
+set(CMAKE_BUILD_TYPE RelWithDebInfo)
 set(CMAKE_CXX_FLAGS -pthread)
 set(CMAKE_CXX_STANDARD 14)
 

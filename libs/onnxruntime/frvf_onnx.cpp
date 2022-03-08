@@ -1,6 +1,8 @@
+
 #include <frvf_onnx.h>
 
 using namespace onnx_frvf;
+cv::Mat resizedImageBGR, resizedImageRGB, resizedImage; 
 
 template <typename T>
 T vectorProduct(const std::vector<T>& v)
@@ -96,9 +98,8 @@ std::ostream& operator<<(std::ostream& os,
  * @param useCUDA 
  * @param OPT_OPTION 
  */
-frvf_onnx::frvf_onnx(std::string file_path, bool useCUDA, int OPT_OPTION){
-    
-    this->_Instance(file_path, useCUDA, OPT_OPTION);
+frvf_onnx::frvf_onnx(char * file_path, bool useCUDA, int OPT_OPTION, int B, int C, int W, int H, char * img_path){
+    this->_Instance(file_path, useCUDA, OPT_OPTION, B, C, W, H, img_path);
 }
 
 GraphOptimizationLevel frvf_onnx::optimizer_selector(int expression){
@@ -125,10 +126,13 @@ GraphOptimizationLevel frvf_onnx::optimizer_selector(int expression){
     return a;
 }
 
-void frvf_onnx::_Instance(std::string file_path, bool useCUDA, int OPT_OPTION)
+void frvf_onnx::_Instance(char * file_path, bool useCUDA, int OPT_OPTION, int B, int C, int W, int H, char * img_path)
 {
-#ifdef _DEBUG_
-    std::string modelFilepath = file_path;
+    std::string modelFilepath(file_path);
+    std::string imageFilepath(img_path);
+    SPDLOG_INFO(modelFilepath);
+    SPDLOG_INFO(useCUDA);
+    SPDLOG_INFO(OPT_OPTION);
     std::string instanceName{"ONNX-face-recognition"};
     sessionOptions = new Ort::SessionOptions;
     sessionOptions->SetIntraOpNumThreads(1);
@@ -154,91 +158,28 @@ void frvf_onnx::_Instance(std::string file_path, bool useCUDA, int OPT_OPTION)
     auto outputTensorInfo = outputTypeInfo.GetTensorTypeAndShapeInfo();
     ONNXTensorElementDataType outputType = outputTensorInfo.GetElementType();
     outputDims = outputTensorInfo.GetShape();
-
-    SPDLOG_TRACE("Number of Input Nodes : {}",numInputNodes);
-    SPDLOG_TRACE("Number of Output Nodes : {}",numOutputNodes);
-    SPDLOG_TRACE("Input Name : {}",inputName);
-    SPDLOG_TRACE("Input Type : {}",inputType);
-    SPDLOG_TRACE("Input Dimensions : {} {} {} {}",inputDims[0],inputDims[1],inputDims[2],inputDims[3]);
-    SPDLOG_TRACE("Output Name : {}",outputName);
-    SPDLOG_TRACE("Output Type : {}",outputType);
-    SPDLOG_TRACE("Output Dimensions : {} {} {} {}",outputDims[0],outputDims[1],outputDims[2],outputDims[3]);
+    
+    SPDLOG_INFO("Number of Input Nodes : {}",numInputNodes);
+    SPDLOG_INFO("Number of Output Nodes : {}",numOutputNodes);
+    SPDLOG_INFO("Input Name : {}",inputName);
+    SPDLOG_INFO("Input Type : {}",inputType);
+    SPDLOG_INFO("Input Dimensions : {} {} {} {}",inputDims[0],inputDims[1],inputDims[2],inputDims[3]);
+    SPDLOG_INFO("Output Name : {}",outputName);
+    SPDLOG_INFO("Output Type : {}",outputType);
+    SPDLOG_INFO("Output Dimensions : {} {} {} {}",outputDims[0],outputDims[1],outputDims[2],outputDims[3]);
 
     inputNames.push_back(inputName);
     outputNames.push_back(outputName);
 
-#else
-    std::string modelFilepath = file_path;
-    std::string instanceName{"ONNX-face-recognition"};
-    Ort::SessionOptions sessionOptions;
 
-    sessionOptions.SetIntraOpNumThreads(1);
-    if (useCUDA)
-    {
-        OrtCUDAProviderOptions cuda_options{0};
-        sessionOptions.AppendExecutionProvider_CUDA(cuda_options);
-    }
-    Ort::Env env(OrtLoggingLevel::ORT_LOGGING_LEVEL_WARNING, instanceName.c_str());
-    // Sets graph optimization level
-    // Available levels are
-    // ORT_DISABLE_ALL -> To disable all optimizations
-    // ORT_ENABLE_BASIC -> To enable basic optimizations (Such as redundant node removals) 
-    // ORT_ENABLE_EXTENDED -> To enable extended optimizations
-    // (Includes level 1 + more complex optimizations like node fusions)
-    // ORT_ENABLE_ALL -> To Enable All possible optimizations
-    sessionOptions.SetGraphOptimizationLevel(
-        GraphOptimizationLevel::ORT_ENABLE_ALL);
-
-    Ort::Session session(env, modelFilepath.c_str(), sessionOptions);
-
-    Ort::AllocatorWithDefaultOptions allocator;
-
-    size_t numInputNodes = session.GetInputCount();
-    size_t numOutputNodes = session.GetOutputCount();
-
-    std::cout << "Number of Input Nodes: " << numInputNodes << std::endl;
-    std::cout << "Number of Output Nodes: " << numOutputNodes << std::endl;
-
-
-    const char* inputName = session.GetInputName(0, allocator);
-    std::cout << "Input Name: " << inputName << std::endl;
-
-    Ort::TypeInfo inputTypeInfo = session.GetInputTypeInfo(0);
-    auto inputTensorInfo = inputTypeInfo.GetTensorTypeAndShapeInfo();
-
-    ONNXTensorElementDataType inputType = inputTensorInfo.GetElementType();
-    std::cout << "Input Type: " << inputType << std::endl;
-
-    std::vector<int64_t> inputDims = inputTensorInfo.GetShape();
-    std::cout << "Input Dimensions: " << inputDims << std::endl;
-
-    const char* outputName = session.GetOutputName(0, allocator);
-    std::cout << "Output Name: " << outputName << std::endl;
-
-    Ort::TypeInfo outputTypeInfo = session.GetOutputTypeInfo(0);
-    auto outputTensorInfo = outputTypeInfo.GetTensorTypeAndShapeInfo();
-
-    ONNXTensorElementDataType outputType = outputTensorInfo.GetElementType();
-    std::cout << "Output Type: " << outputType << std::endl;
-
-    std::vector<int64_t> outputDims = outputTensorInfo.GetShape();
-    std::cout << "Output Dimensions: " << outputDims << std::endl;
-#endif
-}
-
-float frvf_onnx::do_inference(int B, int C, int W, int H, std::string imageFilepath){
-    assert((int64_t)W == inputDims.at(2));
-    assert((int64_t)H == inputDims.at(3));
-
-    cv::Mat resizedImageBGR, resizedImageRGB, resizedImage, preprocessedImage;
     if(imageFilepath.find(".") == std::string::npos){
-        cv::Mat channels[C], imageBGR;
+        cv::Mat channels[C], zeros_mat;
         for(int num = 0; num < C; num++){
             channels[num] = cv::Mat::zeros(W, H, CV_32F);
         }
-        cv::merge(channels, C, imageBGR);
+        cv::merge(channels, C, zeros_mat);
 
-        imageBGR.convertTo(resizedImage, CV_32F, 1.0 / 255);
+        zeros_mat.convertTo(resizedImage, CV_32F, 1.0 / 255);
     }
     else{        
         cv::Mat imageBGR = cv::imread(imageFilepath, cv::ImreadModes::IMREAD_COLOR);
@@ -249,6 +190,12 @@ float frvf_onnx::do_inference(int B, int C, int W, int H, std::string imageFilep
                     cv::ColorConversionCodes::COLOR_BGR2RGB);
         resizedImageRGB.convertTo(resizedImage, CV_32F, 1.0 / 255);
     }
+
+    cv::dnn::blobFromImage(resizedImage, preprocessedImage);
+    
+    assert((int64_t)W == inputDims.at(2));
+    assert((int64_t)H == inputDims.at(3));
+
     // cv::Mat channels[3];
     // cv::split(resizedImage, channels);
     // // Normalization per channel
@@ -259,7 +206,10 @@ float frvf_onnx::do_inference(int B, int C, int W, int H, std::string imageFilep
     // channels[2] = (channels[2] - 0.406) / 0.225;
     // cv::merge(channels, 3, resizedImage);
     // HWC to CHW
-    cv::dnn::blobFromImage(resizedImage, preprocessedImage);
+}
+
+float frvf_onnx::do_inference(){
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
     size_t inputTensorSize = vectorProduct(inputDims);
     std::vector<float> inputTensorValues(inputTensorSize);
@@ -280,37 +230,20 @@ float frvf_onnx::do_inference(int B, int C, int W, int H, std::string imageFilep
     outputTensors.push_back(Ort::Value::CreateTensor<float>(
         memoryInfo, outputTensorValues.data(), outputTensorSize,
         outputDims.data(), outputDims.size()));
-   
-    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+
 
     sess->Run(Ort::RunOptions{nullptr}, inputNames.data(),
                 inputTensors.data(), 1, outputNames.data(),
                 outputTensors.data(), 1);
 
-    for (int _i=0; _i < outputDims[1]; _i ++)
-    {
-        SPDLOG_TRACE("{}",outputTensorValues.at(_i));
-    }
-
+    // for (int _i=0; _i < outputDims[1]; _i ++)
+    // {
+    //     SPDLOG_INFO("{}",outputTensorValues.at(_i));
+    // }
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 
-    float processtime = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-
+    float processtime = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
     return processtime;
-}
-
-std::vector<float> frvf_onnx::workspace(int iter, int B, int C, int W, int H, std::string imageFilepath){
-    if(imageFilepath.find(".") == std::string::npos) SPDLOG_INFO("Use Zero matrix");
-    else SPDLOG_INFO("Use image matrix");
-    int i = 0;
-    std::vector<float> processing_time;
-    while(true)
-    {
-        processing_time.push_back(do_inference(B, C, W, H, imageFilepath));
-        i++;
-        if(iter < i) break;
-    }
-    return processing_time;
 }
 
 frvf_onnx::~frvf_onnx(){
