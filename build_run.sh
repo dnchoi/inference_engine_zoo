@@ -47,32 +47,16 @@ then
 
     cd build
 
-    # Generate a Makefile for GCC (or Clang, depanding on CC/CXX envvar)
     cmake ..
 
-    # Build (ie 'make')
-    # cmake --build .
     make all
     cd ..
 
     sleep 2s
-    echo "One cycle"
     main
 elif [ $BUILD = "run" ]
 then
     echo "Run"
 
-    echo "One cycle"
     main
 fi
-
-# args._B = atoi(argv[1]);
-# args._W = atoi(argv[2]);
-# args._H = atoi(argv[3]);
-# args._C = atoi(argv[4]);
-# args._iter = atoi(argv[5]);
-# args._acc = atoi(argv[6]);
-# args._opti = atoi(argv[6]);
-# args._model = argv[7];
-# args._engine = argv[8];
-

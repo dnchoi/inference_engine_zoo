@@ -23,9 +23,6 @@ namespace onnx_frvf{
     class frvf_onnx
     {
     private:
-    public:
-        frvf_onnx(char * file_path, bool useCUDA, int OPT_OPTION, int B, int C, int W, int H, char * img_path);
-        ~frvf_onnx();
         Ort::Env *env;
         Ort::Session *sess;
         Ort::SessionOptions *sessionOptions;
@@ -43,10 +40,11 @@ namespace onnx_frvf{
         std::vector<const char*> inputNames;
         std::vector<const char*> outputNames;
         cv::Mat preprocessedImage;
-        // std::vector<Ort::Value> inputTensors;
-        // std::vector<Ort::Value> outputTensors;
 
         void _Instance(char * file_path, bool useCUDA, int OPT_OPTION, int B, int C, int W, int H, char * img_path);
+    public:
+        frvf_onnx(char * file_path, bool useCUDA, int OPT_OPTION, int B, int C, int W, int H, char * img_path);
+        ~frvf_onnx();
         float do_inference();
     };
 }
