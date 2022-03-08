@@ -91,54 +91,41 @@ RUN cd /tmp && \
     unzip opencv.zip && \
     unzip opencv_contrib.zip && \
     unzip opencv_extra.zip && \
-    cd opencv-4.4.0 \
-    mkdir build \
-    cd build \
-    cmake -DCMAKE_BUILD_TYPE=RELEASE \
-        -DCMAKE_C_COMPILER=/usr/bin/gcc-7 \
-        -DCMAKE_INSTALL_PREFIX=/usr/local \
-        -DINSTALL_PYTHON_EXAMPLES=ON \
-        -DINSTALL_C_EXAMPLES=ON \
-        -DBUILD_DOCS=OFF \
-        -DBUILD_PERF_TESTS=OFF \
-        -DBUILD_TESTS=OFF \
-        -DBUILD_PACKAGE=OFF \
-        -DBUILD_EXAMPLES=OFF \
-        -DWITH_TBB=ON \
-        -DENABLE_FAST_MATH=1 \
-        -DCUDA_FAST_MATH=1 \
-        -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda \
-        -DWITH_CUDA=ON \
-        -DWITH_CUBLAS=ON \
-        -DWITH_CUFFT=ON \
-        -DWITH_NVCUVID=ON \
-        -DWITH_IPP=OFF \
-        -DWITH_V4L=ON \
-        -DWITH_1394=OFF \
-        -DWITH_GTK=ON \
-        -DWITH_QT=OFF \
-        -DWITH_OPENGL=ON \
+    mkdir -p build && cd build && \
+    cmake -DOPENCV_EXTRA_MODULES_PATH=../opencv_contrib-${OPENCV_VERSION}/modules \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DBUILD_PNG=OFF \
+        -DBUILD_TIFF=OFF \
+        -DBUILD_TBB=OFF \
+        -DBUILD_JPEG=OFF \
+        -DBUILD_JASPER=OFF \
+        -DBUILD_ZLIB=OFF \
+        -DBUILD_EXAMPLES=ON \
+        -DBUILD_JAVA=OFF \
+        -DBUILD_opencv_python2=OFF \
+        -DBUILD_opencv_python3=ON \
         -DWITH_OPENCL=OFF \
-        -DWITH_EIGEN=ON \
+        -DWITH_OPENGL=ON \
+        -DWITH_OPENMP=OFF \
         -DWITH_FFMPEG=ON \
         -DWITH_GSTREAMER=ON \
-        -DBUILD_JAVA=OFF \
-        -DBUILD_opencv_python3=ON \
-        -DBUILD_opencv_python2=OFF \
-        -DBUILD_NEW_PYTHON_SUPPORT=ON \
-        -DOPENCV_SKIP_PYTHON_LOADER=ON \
-        -DOPENCV_GENERATE_PKGCONFIG=ON \
-        -DOPENCV_ENABLE_NONFREE=ON \
-        -DOPENCV_EXTRA_MODULES_PATH=../../opencv_contrib-${OPENCV_VERSION}/modules \
-        -DWITH_CUDNN=ON \
-        -DOPENCV_DNN_CUDA=ON \
+        -DWITH_GSTREAMER_0_10=OFF \
+        -DWITH_CUDA=ON \
+        -DWITH_GTK=ON \
+        -DWITH_VTK=OFF \
+        -DWITH_TBB=ON \
+        -DWITH_1394=OFF \
+        -DWITH_OPENEXR=OFF \
+        -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda \
+        -DCUDNN_LIBRARY=/usr/local/cuda/lib64/libcudnn.so.8.1.1 \
         -DCUDA_ARCH_BIN='6.0 6.2 7.0 7.5' \
         -DCUDA_ARCH_PTX="" \
-        -DCUDNN_LIBRARY=/usr/local/cuda/lib64/libcudnn.so.8.1.1 \
-        -DCUDNN_INCLUDE_DIR=/usr/local/cuda/include  \
+        -DINSTALL_C_EXAMPLES=ON \
+        -DINSTALL_TESTS=OFF \
         -DOPENCV_TEST_DATA_PATH=../opencv_extra-${OPENCV_VERSION}/testdata \
-                ../opencv-${OPENCV_VERSION} && \
-    cmake --build . --parallel ${NUM_JOBS} && \
+        ../opencv-${OPENCV_VERSION} && \
+    cmake --build . --parallel 20 && \
     make install
 RUN rm -rf /tmp/*
 

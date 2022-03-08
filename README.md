@@ -57,64 +57,48 @@ bash cmake-${CMALE_VERSION}-linux-x86_64.sh --prefix=/usr/local --exclude-subdir
 ```bash
 NUM_JOBS=8
 OPENCV_VERSION=4.4.0
-
-mkdir -p ~/SDK_Tools/OpenCV_440
-cd ~/SDK_Tools/OpenCV_440
-wget -O opencv.zip https://github.com/Itseez/opencv/archive/${OPENCV_VERSION}.zip
-unzip opencv.zip
-wget –O opencv_contrib.zip https://github.com/Itseez/opencv_contrib/archive/${OPENCV_VERSION}.zip
-mv ${OPENCV_VERSION}.zip opencv_contrib.zip
-unzip opencv_contrib.zip
-cd opencv-${OPENCV_VERSION}
-mkdir build
-cd build
-
-cmake -DCMAKE_BUILD_TYPE=RELEASE \
-      -DCMAKE_C_COMPILER=/usr/bin/gcc-7 \ <- Your gcc version
-      -DCMAKE_INSTALL_PREFIX=/usr/local \
-      -DINSTALL_PYTHON_EXAMPLES=ON \
-      -DINSTALL_C_EXAMPLES=ON \
-      -DBUILD_DOCS=OFF \
-      -DBUILD_PERF_TESTS=OFF \
-      -DBUILD_TESTS=OFF \
-      -DBUILD_PACKAGE=OFF \
-      -DBUILD_EXAMPLES=OFF \
-      -DWITH_TBB=ON \
-      -DENABLE_FAST_MATH=1 \
-      -DCUDA_FAST_MATH=1 \
-      -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-11.1 \ <- Your CUDA version
-      -DWITH_CUDA=ON \
-      -DWITH_CUBLAS=ON \
-      -DWITH_CUFFT=ON \
-      -DWITH_NVCUVID=ON \
-      -DWITH_IPP=OFF \
-      -DWITH_V4L=ON \
-      -DWITH_1394=OFF \
-      -DWITH_GTK=ON \
-      -DWITH_QT=OFF \
-      -DWITH_OPENGL=ON \
-      -DWITH_OPENCL=OFF \
-      -DWITH_EIGEN=ON \
-      -DWITH_FFMPEG=ON \
-      -DWITH_GSTREAMER=ON \
-      -DBUILD_JAVA=OFF \
-      -DBUILD_opencv_python3=ON \
-      -DBUILD_opencv_python2=OFF \
-      -DBUILD_NEW_PYTHON_SUPPORT=ON \
-      -DOPENCV_SKIP_PYTHON_LOADER=ON \
-      -DOPENCV_GENERATE_PKGCONFIG=ON \
-      -DOPENCV_ENABLE_NONFREE=ON \
-      -DOPENCV_EXTRA_MODULES_PATH=../../opencv_contrib-${OPENCV_VERSION}/modules \
-      -DWITH_CUDNN=ON \
-      -DOPENCV_DNN_CUDA=ON \
-      -DCUDA_ARCH_BIN='6.0 6.2 7.0 7.5' \
-      -DCUDA_ARCH_PTX="" \
-      -DCUDNN_LIBRARY=/usr/local/cuda/lib64/libcudnn.so.8.1.1 \
-      -DCUDNN_INCLUDE_DIR=/usr/local/cuda/include  \
-      -DOPENCV_TEST_DATA_PATH=../opencv_extra-${OPENCV_VERSION}/testdata \
-              ../opencv-${OPENCV_VERSION} && \
+cd /tmp && \
+wget -O opencv.zip https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
+wget -O opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/${OPENCV_VERSION}.zip && \
+wget -O opencv_extra.zip https://github.com/opencv/opencv_extra/archive/${OPENCV_VERSION}.zip && \
+unzip opencv.zip && \
+unzip opencv_contrib.zip && \
+unzip opencv_extra.zip && \
+mkdir -p build && cd build && \
+cmake -DOPENCV_EXTRA_MODULES_PATH=../opencv_contrib-${OPENCV_VERSION}/modules \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DBUILD_PNG=OFF \
+    -DBUILD_TIFF=OFF \
+    -DBUILD_TBB=OFF \
+    -DBUILD_JPEG=OFF \
+    -DBUILD_JASPER=OFF \
+    -DBUILD_ZLIB=OFF \
+    -DBUILD_EXAMPLES=ON \
+    -DBUILD_JAVA=OFF \
+    -DBUILD_opencv_python2=OFF \
+    -DBUILD_opencv_python3=ON \
+    -DWITH_OPENCL=OFF \
+    -DWITH_OPENMP=OFF \
+    -DWITH_FFMPEG=ON \
+    -DWITH_GSTREAMER=OFF \
+    -DWITH_GSTREAMER_0_10=OFF \
+    -DWITH_CUDA=ON \
+    -DWITH_GTK=ON \
+    -DWITH_VTK=OFF \
+    -DWITH_TBB=ON \
+    -DWITH_1394=OFF \
+    -DWITH_OPENEXR=OFF \
+    -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda \
+    -DCUDA_ARCH_BIN='6.0 6.2 7.0 7.5' \
+    -DCUDA_ARCH_PTX="" \
+    -DINSTALL_C_EXAMPLES=ON \
+    -DINSTALL_TESTS=OFF \
+    -DOPENCV_TEST_DATA_PATH=../opencv_extra-${OPENCV_VERSION}/testdata \
+    ../opencv-${OPENCV_VERSION} && \
 cmake --build . --parallel ${NUM_JOBS} && \
-make install
+sudo make install
+sudo rm -rf /tmp/*
 
 pkg-config --modversion opencv4
 pkg-config --libs --cflags opencv4
