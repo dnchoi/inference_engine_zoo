@@ -3,7 +3,7 @@ FROM nvcr.io/nvidia/cuda:11.1-cudnn8-devel-ubuntu18.04
 ARG OPENCV_VERSION=4.4.0
 ARG ONNXRUNTIME_VERSION=1.8.2
 ARG CMALE_VERSION=3.21.1
-ARG NUM_JOBS=40
+ARG NUM_JOBS=8
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -77,7 +77,6 @@ RUN apt -y install mesa-utils libgl1-mesa-dri libgtkgl2.0-dev libgtkglext1-dev
 RUN apt -y install libatlas-base-dev gfortran libeigen3-dev
 RUN apt -y install python2.7-dev python3-dev python-numpy python3-numpy
 RUN apt -y install libgtk-3-dev
-RUN apt -y install libqt5-dev
 
 RUN apt install -y libgstreamer1.0-0 libgstreamer1.0-dev \
                     gstreamer1.0-tools gstreamer1.0-doc gstreamer1.0-x gstreamer1.0-plugins-base \

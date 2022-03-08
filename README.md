@@ -30,7 +30,6 @@ sudo apt -y install mesa-utils libgl1-mesa-dri libgtkgl2.0-dev libgtkglext1-dev
 sudo apt -y install libatlas-base-dev gfortran libeigen3-dev
 sudo apt -y install python2.7-dev python3-dev python-numpy python3-numpy
 sudo apt -y install libgtk-3-dev
-sudo apt -y install libqt5-dev
 
 sudo apt install -y libgstreamer1.0-0 libgstreamer1.0-dev \
                     gstreamer1.0-tools gstreamer1.0-doc gstreamer1.0-x gstreamer1.0-plugins-base \
