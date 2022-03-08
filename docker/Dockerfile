@@ -94,7 +94,6 @@ RUN cd /tmp && \
     cd opencv-4.4.0 \
     mkdir build \
     cd build \
-
 	cmake -D CMAKE_BUILD_TYPE=RELEASE \
 		-D CMAKE_C_COMPILER=/usr/bin/gcc-7 \
 		-D CMAKE_INSTALL_PREFIX=/usr/local \
