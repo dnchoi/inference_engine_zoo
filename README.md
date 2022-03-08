@@ -1,5 +1,13 @@
 # ONNX runtime test using C++
 
+## Docker build
+```bash
+docker build -f docker/Dockerfile  --no-cache --tag=onnxruntime-cuda:1.8.2 .
+```
+## Run Docker Container
+```bash
+docker run -it --gpus device=0 -v $(pwd):/mnt --net host --privileged -e DISPLAY=unix$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix onnxruntime-cuda:1.8.2 
+```
 
 ## Install & Dependence
 > Dependence
@@ -41,15 +49,16 @@ bash cmake-${CMALE_VERSION}-linux-x86_64.sh --prefix=/usr/local --exclude-subdir
 * OpenCV
 ```bash
 NUM_JOBS=8
+OPENCV_VERSION=4.4.0
 
 mkdir -p ~/SDK_Tools/OpenCV_440
 cd ~/SDK_Tools/OpenCV_440
-wget -O opencv.zip https://github.com/Itseez/opencv/archive/4.4.0.zip
+wget -O opencv.zip https://github.com/Itseez/opencv/archive/${OPENCV_VERSION}.zip
 unzip opencv.zip
-wget –O opencv_contrib.zip https://github.com/Itseez/opencv_contrib/archive/4.4.0.zip
-mv 4.4.0.zip opencv_contrib.zip
+wget –O opencv_contrib.zip https://github.com/Itseez/opencv_contrib/archive/${OPENCV_VERSION}.zip
+mv ${OPENCV_VERSION}.zip opencv_contrib.zip
 unzip opencv_contrib.zip
-cd opencv-4.4.0
+cd opencv-${OPENCV_VERSION}
 mkdir build
 cd build
 
@@ -88,7 +97,7 @@ cmake -D CMAKE_BUILD_TYPE=RELEASE \
 -D OPENCV_SKIP_PYTHON_LOADER=ON \
 -D OPENCV_GENERATE_PKGCONFIG=ON \
 -D OPENCV_ENABLE_NONFREE=ON \
--D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib-4.4.0/modules \
+-D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib-${OPENCV_VERSION}/modules \
 -D WITH_CUDNN=ON \
 -D OPENCV_DNN_CUDA=ON \
 -D CUDA_ARCH_BIN='6.0 6.2 7.0 7.5' \
