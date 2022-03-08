@@ -1,13 +1,20 @@
 # ONNX runtime test using C++
 
 ## Docker build
+> x86_64
 ```bash
 docker build -f docker/Dockerfile  --no-cache --tag=onnxruntime-cuda:1.8.2 .
+```
+> amd64 [jetson nano / nx]
+```bash
+docker build --platform linux/amd64 -f docker/Dockerfile  --no-cache --tag=onnxruntime-cuda:1.8.2 .
 ```
 ## Run Docker Container
 ```bash
 docker run -it --gpus device=0 -v $(pwd):/mnt --net host --privileged -e DISPLAY=unix$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix onnxruntime-cuda:1.8.2 
 ```
+
+
 
 ## Install & Dependence
 > Dependence
@@ -62,51 +69,52 @@ cd opencv-${OPENCV_VERSION}
 mkdir build
 cd build
 
-cmake -D CMAKE_BUILD_TYPE=RELEASE \
--D CMAKE_C_COMPILER=/usr/bin/gcc-7 \ <- Your gcc version
--D CMAKE_INSTALL_PREFIX=/usr/local \
--D INSTALL_PYTHON_EXAMPLES=ON \
--D INSTALL_C_EXAMPLES=ON \
--D BUILD_DOCS=OFF \
--D BUILD_PERF_TESTS=OFF \
--D BUILD_TESTS=OFF \
--D BUILD_PACKAGE=OFF \
--D BUILD_EXAMPLES=OFF \
--D WITH_TBB=ON \
--D ENABLE_FAST_MATH=1 \
--D CUDA_FAST_MATH=1 \
--D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-11.1 \ <- Your CUDA version
--D WITH_CUDA=ON \
--D WITH_CUBLAS=ON \
--D WITH_CUFFT=ON \
--D WITH_NVCUVID=ON \
--D WITH_IPP=OFF \
--D WITH_V4L=ON \
--D WITH_1394=OFF \
--D WITH_GTK=ON \
--D WITH_QT=OFF \
--D WITH_OPENGL=ON \
--D WITH_OPENCL=OFF \
--D WITH_EIGEN=ON \
--D WITH_FFMPEG=ON \
--D WITH_GSTREAMER=ON \
--D BUILD_JAVA=OFF \
--D BUILD_opencv_python3=ON \
--D BUILD_opencv_python2=OFF \
--D BUILD_NEW_PYTHON_SUPPORT=ON \
--D OPENCV_SKIP_PYTHON_LOADER=ON \
--D OPENCV_GENERATE_PKGCONFIG=ON \
--D OPENCV_ENABLE_NONFREE=ON \
--D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib-${OPENCV_VERSION}/modules \
--D WITH_CUDNN=ON \
--D OPENCV_DNN_CUDA=ON \
--D CUDA_ARCH_BIN='6.0 6.2 7.0 7.5' \
--D CUDA_ARCH_PTX="" \
--D CUDNN_LIBRARY=/usr/local/cuda/lib64/libcudnn.so.8.1.1 \
--D CUDNN_INCLUDE_DIR=/usr/local/cuda/include  ..
-
-make -j${NUM_JOBS}
-sudo make install
+cmake -DCMAKE_BUILD_TYPE=RELEASE \
+      -DCMAKE_C_COMPILER=/usr/bin/gcc-7 \ <- Your gcc version
+      -DCMAKE_INSTALL_PREFIX=/usr/local \
+      -DINSTALL_PYTHON_EXAMPLES=ON \
+      -DINSTALL_C_EXAMPLES=ON \
+      -DBUILD_DOCS=OFF \
+      -DBUILD_PERF_TESTS=OFF \
+      -DBUILD_TESTS=OFF \
+      -DBUILD_PACKAGE=OFF \
+      -DBUILD_EXAMPLES=OFF \
+      -DWITH_TBB=ON \
+      -DENABLE_FAST_MATH=1 \
+      -DCUDA_FAST_MATH=1 \
+      -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-11.1 \ <- Your CUDA version
+      -DWITH_CUDA=ON \
+      -DWITH_CUBLAS=ON \
+      -DWITH_CUFFT=ON \
+      -DWITH_NVCUVID=ON \
+      -DWITH_IPP=OFF \
+      -DWITH_V4L=ON \
+      -DWITH_1394=OFF \
+      -DWITH_GTK=ON \
+      -DWITH_QT=OFF \
+      -DWITH_OPENGL=ON \
+      -DWITH_OPENCL=OFF \
+      -DWITH_EIGEN=ON \
+      -DWITH_FFMPEG=ON \
+      -DWITH_GSTREAMER=ON \
+      -DBUILD_JAVA=OFF \
+      -DBUILD_opencv_python3=ON \
+      -DBUILD_opencv_python2=OFF \
+      -DBUILD_NEW_PYTHON_SUPPORT=ON \
+      -DOPENCV_SKIP_PYTHON_LOADER=ON \
+      -DOPENCV_GENERATE_PKGCONFIG=ON \
+      -DOPENCV_ENABLE_NONFREE=ON \
+      -DOPENCV_EXTRA_MODULES_PATH=../../opencv_contrib-${OPENCV_VERSION}/modules \
+      -DWITH_CUDNN=ON \
+      -DOPENCV_DNN_CUDA=ON \
+      -DCUDA_ARCH_BIN='6.0 6.2 7.0 7.5' \
+      -DCUDA_ARCH_PTX="" \
+      -DCUDNN_LIBRARY=/usr/local/cuda/lib64/libcudnn.so.8.1.1 \
+      -DCUDNN_INCLUDE_DIR=/usr/local/cuda/include  \
+      -DOPENCV_TEST_DATA_PATH=../opencv_extra-${OPENCV_VERSION}/testdata \
+              ../opencv-${OPENCV_VERSION} && \
+cmake --build . --parallel ${NUM_JOBS} && \
+make install
 
 pkg-config --modversion opencv4
 pkg-config --libs --cflags opencv4
