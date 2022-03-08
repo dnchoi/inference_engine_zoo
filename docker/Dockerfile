@@ -91,7 +91,10 @@ RUN cd /tmp && \
     unzip opencv.zip && \
     unzip opencv_contrib.zip && \
     unzip opencv_extra.zip && \
-    mkdir -p build && cd build && \	
+    cd opencv-4.4.0 \
+    mkdir build \
+    cd build \
+
 	cmake -D CMAKE_BUILD_TYPE=RELEASE \
 		-D CMAKE_C_COMPILER=/usr/bin/gcc-7 \
 		-D CMAKE_INSTALL_PREFIX=/usr/local \
