@@ -3,7 +3,7 @@ FROM nvcr.io/nvidia/cuda:11.1-cudnn8-devel-ubuntu18.04
 ARG OPENCV_VERSION=4.4.0
 ARG ONNXRUNTIME_VERSION=1.8.2
 ARG CMALE_VERSION=3.21.1
-ARG NUM_JOBS=8
+ARG NUM_JOBS=40
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -69,7 +69,8 @@ RUN apt -y install build-essential cmake
 RUN apt -y install pkg-config
 RUN apt -y install libjpeg-dev libpng-dev
 RUN apt -y install libavcodec-dev libavformat-dev libswscale-dev libxvidcore-dev libx264-dev libxine2-dev
-RUN apt -y install lib41-dev v4l-utils
+RUN apt -y install v4l-utils
+RUN apt -y install libv4l-dev
 RUN apt -y install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
 RUN apt -y install libgtk2.0-dev
 RUN apt -y install mesa-utils libgl1-mesa-dri libgtkgl2.0-dev libgtkglext1-dev  
@@ -128,6 +129,7 @@ RUN cd /tmp && \
 		-D OPENCV_GENERATE_PKGCONFIG=ON \
 		-D OPENCV_ENABLE_NONFREE=ON \
 		-D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib-${OPENCV_VERSION}/modules \
+        -D OPENCV_TEST_DATA_PATH=../opencv_extra-${OPENCV_VERSION}/testdata \
 		-D WITH_CUDNN=ON \
 		-D OPENCV_DNN_CUDA=ON \
 		-D CUDA_ARCH_BIN='6.0 6.2 7.0 7.5' \

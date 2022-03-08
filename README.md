@@ -17,12 +17,13 @@ docker run -it --gpus device=0 -v $(pwd):/mnt --net host --privileged -e DISPLAY
 > Install
 * Package dependecies
 ```bash
+sudo apt update
 sudo apt -y install g++
 sudo apt -y install build-essential cmake
 sudo apt -y install pkg-config
 sudo apt -y install libjpeg-dev libpng-dev
 sudo apt -y install libavcodec-dev libavformat-dev libswscale-dev libxvidcore-dev libx264-dev libxine2-dev
-sudo apt -y install lib41-dev v4l-utils
+sudo apt -y install libv4l-dev v4l-utils
 sudo apt -y install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
 sudo apt -y install libgtk2.0-dev
 sudo apt -y install mesa-utils libgl1-mesa-dri libgtkgl2.0-dev libgtkglext1-dev  
