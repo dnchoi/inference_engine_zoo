@@ -7,7 +7,27 @@
 #include <assert.h>
 #include <fstream>
 #include <filesystem>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
+bool DirectoryExists( const char* pzPath )
+{
+    if ( pzPath == NULL) return false;
+
+    DIR *pDir;
+    bool bExists = false;
+
+    pDir = opendir (pzPath);
+
+    if (pDir != NULL)
+    {
+        bExists = true;    
+        (void) closedir (pDir);
+    }
+
+    return bExists;
+}
 
 std::vector<std::string> split(std::string input, char delimiter) {
     std::vector<std::string> answer;
@@ -90,37 +110,87 @@ int main(int argc, char* argv[]){
     SPDLOG_INFO("model path : {}", args._model);
     SPDLOG_INFO("engine : {}", args._engine);
     SPDLOG_INFO("img path : {}", args._file);
+
     std::string _engine(args._engine);
+    char * output_folder = "output";
+    
+    if (!std::filesystem::exists(output_folder)){
+        SPDLOG_WARN("Create Directory");
+        int nResult = mkdir(output_folder, 0777);
+        if( nResult == 0 )
+        {
+            SPDLOG_INFO( "Created Directory" );
+        }
+        else if( nResult == -1 )
+        {
+            SPDLOG_ERROR( "Failed Directory Create\n" );
+            SPDLOG_ERROR( "errorno : {}", errno );
+        }
+    }
+    else{
+        SPDLOG_INFO("Directory exists");
+    }
+
     if(_engine == "onnx"){
         try
         {
-            // for (const auto & file : std::filesystem::directory_iterator(args._model)){
-            std::vector<float> avg_ms(0, args._iter);
-            // const char *_model_name = file.path().c_str();
-            // _model_name = "model.onnx";
-            onnx_frvf::frvf_onnx *onnx;
-            onnx = new onnx_frvf::frvf_onnx(args._model, args._acc, args._opti, args._B, args._C, args._W, args._H, args._file);
-            std::string tmp(args._model);
-            std::vector<std::string> result = split(tmp, '/');
-            std::string filePath = result[result.size()-1]+".csv";
-            SPDLOG_INFO(filePath);
-            std::ofstream writeFile(filePath);
-            if( writeFile.is_open() ){
-                writeFile << "processing time,";
-                for(int num = 0; num < args._iter; num++){
-                    float pro_time = onnx->do_inference();
-                    writeFile << pro_time << ",";
-                    avg_ms.push_back(pro_time);
-                    SPDLOG_INFO("Iter number : {} / Processing time : {:03.8f}", num, pro_time);
+            if(DirectoryExists(args._model)){
+                SPDLOG_WARN("Directory mode");
+                for (const auto & file : std::filesystem::directory_iterator(args._model)){
+                    std::vector<float> avg_ms(0, args._iter-1);
+                    const char *_model_name = file.path().c_str();
+                    onnx_frvf::frvf_onnx *onnx;
+                    onnx = new onnx_frvf::frvf_onnx(_model_name, args._acc, args._opti, args._B, args._C, args._W, args._H, args._file);
+                    std::vector<std::string> result = split((std::string)_model_name, '/');
+                    std::string filePath = (std::string)output_folder + "/" + result[result.size()-1]+".csv";
+                    SPDLOG_INFO(filePath);
+                    std::ofstream writeFile(filePath);
+                    if( writeFile.is_open() ){
+                        writeFile << "processing time,";
+                        for(int num = 0; num < args._iter; num++){
+                            float pro_time = onnx->do_inference();
+                            if(num != 0){
+                                writeFile << pro_time << ",";
+                                avg_ms.push_back(pro_time);
+                                SPDLOG_INFO("Iter number : {} / Processing time : {:03.8f}", num, pro_time);
+                            }
+                        }
+                        SPDLOG_INFO(avg_ms.size());
+                        float average = std::accumulate( avg_ms.begin(), avg_ms.end(), 0.0 ) / avg_ms.size();
+                        writeFile << "\naverage time," << average << "\n";
+                        SPDLOG_INFO("{:03.8f} micro / {:03.8f} milli", average, average/1000);
+                            
+                    }
+                    writeFile.close(); 
                 }
-                SPDLOG_INFO(avg_ms.size());
-                float average = std::accumulate( avg_ms.begin(), avg_ms.end(), 0.0 ) / avg_ms.size();
-                writeFile << "\naverage time," << average << "\n";
-                SPDLOG_INFO("{:03.8f} micro / {:03.8f} milli", average, average/1000);
-                    
             }
-            writeFile.close(); 
-            // }
+            else{
+                SPDLOG_WARN("File mode");
+                std::vector<float> avg_ms(0, args._iter-1);
+                onnx_frvf::frvf_onnx *onnx;
+                onnx = new onnx_frvf::frvf_onnx(args._model, args._acc, args._opti, args._B, args._C, args._W, args._H, args._file);
+                std::vector<std::string> result = split((std::string)args._model, '/');
+                std::string filePath = (std::string)output_folder + "/" + result[result.size()-1]+".csv";
+                SPDLOG_INFO(filePath);
+                std::ofstream writeFile(filePath);
+                if( writeFile.is_open() ){
+                    writeFile << "processing time,";
+                    for(int num = 0; num < args._iter; num++){
+                        float pro_time = onnx->do_inference();
+                        if(num != 0){
+                            writeFile << pro_time << ",";
+                            avg_ms.push_back(pro_time);
+                            SPDLOG_INFO("Iter number : {} / Processing time : {:03.8f}", num, pro_time);
+                        }
+                    }
+                    SPDLOG_INFO(avg_ms.size());
+                    float average = std::accumulate( avg_ms.begin(), avg_ms.end(), 0.0 ) / avg_ms.size();
+                    writeFile << "\naverage time," << average << "\n";
+                    SPDLOG_INFO("{:03.8f} micro / {:03.8f} milli", average, average/1000);
+                        
+                }
+                writeFile.close(); 
+            }
         }
         catch(const std::exception& e)
         {

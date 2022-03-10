@@ -8,8 +8,7 @@ ARG NUM_JOBS=8
 ENV DEBIAN_FRONTEND noninteractive
 
 # Install package dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-        build-essential \
+RUN apt update && apt install -y build-essential \
         software-properties-common \
         autoconf \
         automake \
