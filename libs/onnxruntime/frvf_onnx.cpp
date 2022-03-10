@@ -98,7 +98,15 @@ std::ostream& operator<<(std::ostream& os,
  * @param useCUDA 
  * @param OPT_OPTION 
  */
-frvf_onnx::frvf_onnx(char * file_path, bool useCUDA, int OPT_OPTION, int B, int C, int W, int H, char * img_path){
+frvf_onnx::frvf_onnx(const char * file_path, bool useCUDA, int OPT_OPTION, int B, int C, int W, int H, char * img_path){
+    SPDLOG_INFO(file_path);
+    SPDLOG_INFO(useCUDA);
+    SPDLOG_INFO(OPT_OPTION);
+    SPDLOG_INFO(B);
+    SPDLOG_INFO(C);
+    SPDLOG_INFO(W);
+    SPDLOG_INFO(H);
+    SPDLOG_INFO(img_path);
     this->_Instance(file_path, useCUDA, OPT_OPTION, B, C, W, H, img_path);
 }
 
@@ -126,7 +134,7 @@ GraphOptimizationLevel frvf_onnx::optimizer_selector(int expression){
     return a;
 }
 
-void frvf_onnx::_Instance(char * file_path, bool useCUDA, int OPT_OPTION, int B, int C, int W, int H, char * img_path)
+void frvf_onnx::_Instance(const char * file_path, bool useCUDA, int OPT_OPTION, int B, int C, int W, int H, char * img_path)
 {
     std::string modelFilepath(file_path);
     std::string imageFilepath(img_path);
@@ -159,6 +167,12 @@ void frvf_onnx::_Instance(char * file_path, bool useCUDA, int OPT_OPTION, int B,
     ONNXTensorElementDataType outputType = outputTensorInfo.GetElementType();
     outputDims = outputTensorInfo.GetShape();
     
+    if(inputDims[0] == -1){
+        inputDims[0] = B;
+    }
+    if(outputDims[0] == -1){
+        outputDims[0] = B;
+    }
     SPDLOG_INFO("Number of Input Nodes : {}",numInputNodes);
     SPDLOG_INFO("Number of Output Nodes : {}",numOutputNodes);
     SPDLOG_INFO("Input Name : {}",inputName);
@@ -192,9 +206,9 @@ void frvf_onnx::_Instance(char * file_path, bool useCUDA, int OPT_OPTION, int B,
     }
 
     cv::dnn::blobFromImage(resizedImage, preprocessedImage);
-    
     assert((int64_t)W == inputDims.at(2));
     assert((int64_t)H == inputDims.at(3));
+    SPDLOG_INFO("Instance Done");
 
     // cv::Mat channels[3];
     // cv::split(resizedImage, channels);
@@ -242,7 +256,7 @@ float frvf_onnx::do_inference(){
     // }
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 
-    float processtime = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+    float processtime = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
     return processtime;
 }
 

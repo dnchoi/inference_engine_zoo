@@ -41,9 +41,9 @@ namespace onnx_frvf{
         std::vector<const char*> outputNames;
         cv::Mat preprocessedImage;
 
-        void _Instance(char * file_path, bool useCUDA, int OPT_OPTION, int B, int C, int W, int H, char * img_path);
+        void _Instance(const char * file_path, bool useCUDA, int OPT_OPTION, int B, int C, int W, int H, char * img_path);
     public:
-        frvf_onnx(char * file_path, bool useCUDA, int OPT_OPTION, int B, int C, int W, int H, char * img_path);
+        frvf_onnx(const char * file_path, bool useCUDA, int OPT_OPTION, int B, int C, int W, int H, char * img_path);
         ~frvf_onnx();
         float do_inference();
     };

@@ -9,7 +9,7 @@
 # bash build_run.sh build 0 img.png
 # bash build_run.sh build 1000 img.png
 
-
+ ### bash build_run.sh build 1 3 112 112 10 1 0 /mnt/md0/FAIP.3.0/candidate_model/onnx onnx img.png
 # exit on first error
 set -e
 
@@ -38,6 +38,7 @@ echo "USING ENGINE : $ENGINE"
 echo "IMAGE PATH : $IMG"
 
 function main {
+    echo "./build/main $BATCH $C $W $H $ITER $ACC $OPTI $MODEL $ENGINE $IMG"
     ./build/main $BATCH $C $W $H $ITER $ACC $OPTI $MODEL $ENGINE $IMG
 }
 

@@ -6,6 +6,20 @@
 #include "spdlog/sinks/basic_file_sink.h"
 #include <assert.h>
 #include <fstream>
+#include <filesystem>
+
+
+std::vector<std::string> split(std::string input, char delimiter) {
+    std::vector<std::string> answer;
+    std::stringstream ss(input);
+    std::string temp;
+ 
+    while (getline(ss, temp, delimiter)) {
+        answer.push_back(temp);
+    }
+ 
+    return answer;
+}
 
 int main(int argc, char* argv[]){
     /**
@@ -78,34 +92,35 @@ int main(int argc, char* argv[]){
     SPDLOG_INFO("img path : {}", args._file);
     std::string _engine(args._engine);
     if(_engine == "onnx"){
-
         try
         {
+            // for (const auto & file : std::filesystem::directory_iterator(args._model)){
+            std::vector<float> avg_ms(0, args._iter);
+            // const char *_model_name = file.path().c_str();
+            // _model_name = "model.onnx";
             onnx_frvf::frvf_onnx *onnx;
             onnx = new onnx_frvf::frvf_onnx(args._model, args._acc, args._opti, args._B, args._C, args._W, args._H, args._file);
-            std::vector<float> avg_ms(0, args._iter);
-
-            for(int num = 0; num < args._iter; num++){
-                float pro_time = onnx->do_inference();
-                avg_ms.push_back(pro_time);
-                SPDLOG_INFO("Iter number : {} / Processing time : {:03.8f}", num, pro_time);
-            }
-            float average = std::accumulate( avg_ms.begin(), avg_ms.end(), 0.0 ) / avg_ms.size();
-
-            SPDLOG_INFO("{:03.8f} micro / {:03.8f} milli", average, average/1000);
-
-        	std::string filePath = "output.csv";
-
-            std::ofstream writeFile(filePath.data());
+            std::string tmp(args._model);
+            std::vector<std::string> result = split(tmp, '/');
+            std::string filePath = result[result.size()-1]+".csv";
+            SPDLOG_INFO(filePath);
+            std::ofstream writeFile(filePath);
             if( writeFile.is_open() ){
-                writeFile << "BATCH,CHANNEL,WIDTH,HEIGHT,ITERATE,ACCELERATOR,OPTIMIZER,MODEL,ENGINE,FILE,MICRO,MILLI\n";
-                writeFile << args._B << "," << args._C << "," << args._W << "," 
-                          << args._H << "," << args._iter << "," << args._acc << "," 
-                          << args._opti << "," << args._model << "," << args._engine << "," 
-                          << args._file << "," << average << "," << average/1000 << "\n";
-                
-                writeFile.close(); 
+                writeFile << "processing time,";
+                for(int num = 0; num < args._iter; num++){
+                    float pro_time = onnx->do_inference();
+                    writeFile << pro_time << ",";
+                    avg_ms.push_back(pro_time);
+                    SPDLOG_INFO("Iter number : {} / Processing time : {:03.8f}", num, pro_time);
+                }
+                SPDLOG_INFO(avg_ms.size());
+                float average = std::accumulate( avg_ms.begin(), avg_ms.end(), 0.0 ) / avg_ms.size();
+                writeFile << "\naverage time," << average << "\n";
+                SPDLOG_INFO("{:03.8f} micro / {:03.8f} milli", average, average/1000);
+                    
             }
+            writeFile.close(); 
+            // }
         }
         catch(const std::exception& e)
         {
