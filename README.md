@@ -20,15 +20,7 @@ docker run -it --gpus device=0 -v $(pwd):/mnt --net host --privileged -e DISPLAY
 #!/bin/sh
 
 # commend
-# bash build_run.sh run 0 img
-# bash build_run.sh run 0 img.png
-# bash build_run.sh run 1000 img.png
-
-# bash build_run.sh build 0 img
-# bash build_run.sh build 0 img.png
-# bash build_run.sh build 1000 img.png
-
-
+# bash build_run.sh build 1 3 112 112 10 1 0 /mnt/md0/FAIP.3.0/candidate_model/model.onnx onnx img.png
 # exit on first error
 set -e
 
@@ -57,6 +49,7 @@ echo "USING ENGINE : $ENGINE"
 echo "IMAGE PATH : $IMG"
 
 function main {
+    echo "./build/main $BATCH $C $W $H $ITER $ACC $OPTI $MODEL $ENGINE $IMG"
     ./build/main $BATCH $C $W $H $ITER $ACC $OPTI $MODEL $ENGINE $IMG
 }
 

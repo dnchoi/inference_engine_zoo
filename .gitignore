@@ -2,4 +2,3 @@
 *.onnx
 build
 log
-*.csv
