@@ -1,13 +1,13 @@
 ARG BASE_IMAGE=nvcr.io/nvidia/l4t-base:r32.4.4
-ARG PYTORCH_IMAGE
-ARG TENSORFLOW_IMAGE
+# ARG PYTORCH_IMAGE
+# ARG TENSORFLOW_IMAGE
 
 ARG OPENCV_VERSION=4.5.3
 ARG ONNXRUNTIME_VERSION=1.8.2
 ARG CMALE_VERSION=3.21.1
 
-FROM ${PYTORCH_IMAGE} as pytorch
-FROM ${TENSORFLOW_IMAGE} as tensorflow
+# FROM ${PYTORCH_IMAGE} as pytorch
+# FROM ${TENSORFLOW_IMAGE} as tensorflow
 FROM ${BASE_IMAGE}
 
 
@@ -109,19 +109,19 @@ RUN rm -rf /tmp/*
 #
 ENV PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=cpp
 
-COPY --from=tensorflow /usr/local/bin/protoc /usr/local/bin
-COPY --from=tensorflow /usr/local/lib/libproto* /usr/local/lib/
-COPY --from=tensorflow /usr/local/include/google /usr/local/include/google
+# COPY --from=tensorflow /usr/local/bin/protoc /usr/local/bin
+# COPY --from=tensorflow /usr/local/lib/libproto* /usr/local/lib/
+# COPY --from=tensorflow /usr/local/include/google /usr/local/include/google
 
 
-#
-# python packages from TF/PyTorch containers
-#
-COPY --from=tensorflow /usr/local/lib/python2.7/dist-packages/ /usr/local/lib/python2.7/dist-packages/
-COPY --from=tensorflow /usr/local/lib/python3.6/dist-packages/ /usr/local/lib/python3.6/dist-packages/
+# #
+# # python packages from TF/PyTorch containers
+# #
+# COPY --from=tensorflow /usr/local/lib/python2.7/dist-packages/ /usr/local/lib/python2.7/dist-packages/
+# COPY --from=tensorflow /usr/local/lib/python3.6/dist-packages/ /usr/local/lib/python3.6/dist-packages/
 
-COPY --from=pytorch /usr/local/lib/python2.7/dist-packages/ /usr/local/lib/python2.7/dist-packages/
-COPY --from=pytorch /usr/local/lib/python3.6/dist-packages/ /usr/local/lib/python3.6/dist-packages/
+# COPY --from=pytorch /usr/local/lib/python2.7/dist-packages/ /usr/local/lib/python2.7/dist-packages/
+# COPY --from=pytorch /usr/local/lib/python3.6/dist-packages/ /usr/local/lib/python3.6/dist-packages/
 
 
 #
@@ -204,7 +204,7 @@ RUN cd /tmp && \
         --build_shared_lib \
         --build_wheel \
         --skip_tests \
-        --parallel ${NUM_JOBS} && \
+        --parallel ${MAKEFLAGS} && \
     cd build/Linux/RelWithDebInfo && \
     make install && \
     pip install dist/*
