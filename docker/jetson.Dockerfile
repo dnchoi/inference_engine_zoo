@@ -95,11 +95,18 @@ ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
 
-# # Install CMake
-# RUN cd /tmp && \
-#     wget https://github.com/Kitware/CMake/releases/download/v${CMALE_VERSION}/cmake-${CMALE_VERSION}-linux-aarch64.sh && \
-#     bash cmake-${CMALE_VERSION}-linux-aarch64.sh --prefix=/usr/local --exclude-subdir --skip-license
-# RUN rm -rf /tmp/*
+ARG CMAKE_VERSION=3.19.1
+ARG MAKEFLAGS=6
+# Install CMake
+RUN cd /tmp && \
+    wget https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}.tar.gz \
+    tar xvf cmake-${CMAKE_VERSION}.tar.gz \
+    mkdir build ; cd build \
+    cmake .. \
+    make -j${MAKEFLAGS} \
+    make install \
+    cmake --version
+RUN rm -rf /tmp/*
 
 #
 # pull protobuf-cpp from TF container
@@ -189,7 +196,6 @@ RUN mkdir opencv && \
 # 	/bin/bash
 
 ARG ONNXRUNTIME_VERSION=1.8.2
-ARG MAKEFLAGS=6
 
 # Install ONNX Runtime
 RUN pip install pytest==6.2.1 onnx==1.10.1
@@ -201,7 +207,7 @@ RUN cd /tmp && \
         --cuda_home /usr/local/cuda \
         --cudnn_home /usr/lib/aarch64-linux-gnu/ \
         --use_cuda \
-        --config Release \
+        --config RelWithDebInfo \
         --build_shared_lib \
         --build_wheel \
         --skip_tests \
