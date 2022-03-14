@@ -98,11 +98,11 @@ ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
 
-# Install CMake
-RUN cd /tmp && \
-    wget https://github.com/Kitware/CMake/releases/download/v${CMALE_VERSION}/cmake-${CMALE_VERSION}-linux-aarch64.sh && \
-    bash cmake-${CMALE_VERSION}-linux-aarch64.sh --prefix=/usr/local --exclude-subdir --skip-license
-RUN rm -rf /tmp/*
+# # Install CMake
+# RUN cd /tmp && \
+#     wget https://github.com/Kitware/CMake/releases/download/v${CMALE_VERSION}/cmake-${CMALE_VERSION}-linux-aarch64.sh && \
+#     bash cmake-${CMALE_VERSION}-linux-aarch64.sh --prefix=/usr/local --exclude-subdir --skip-license
+# RUN rm -rf /tmp/*
 
 #
 # pull protobuf-cpp from TF container
