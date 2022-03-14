@@ -80,6 +80,7 @@ RUN apt-get update && \
 		libsndfile1 \
         cmake libopenblas-dev \
 	    libpython3.6-dev \
+        libssl-dev openssl1.0\
         tar \
     && rm -rf /var/lib/apt/lists/*
 
