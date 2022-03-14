@@ -138,15 +138,15 @@ ENV PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=cpp
 #
 # CuPy
 #
-ARG CUPY_VERSION=v9.2.0
-ARG CUPY_NVCC_GENERATE_CODE="arch=compute_53,code=sm_53;arch=compute_62,code=sm_62;arch=compute_72,code=sm_72"
+# ARG CUPY_VERSION=v9.2.0
+# ARG CUPY_NVCC_GENERATE_CODE="arch=compute_53,code=sm_53;arch=compute_62,code=sm_62;arch=compute_72,code=sm_72"
 
-RUN git clone -b ${CUPY_VERSION} --recursive https://github.com/cupy/cupy cupy && \
-    cd cupy && \
-    pip3 install --no-cache-dir fastrlock && \
-    python3 setup.py install --verbose && \
-    cd ../ && \
-    rm -rf cupy
+# RUN git clone -b ${CUPY_VERSION} --recursive https://github.com/cupy/cupy cupy && \
+#     cd cupy && \
+#     pip3 install --no-cache-dir fastrlock && \
+#     python3 setup.py install --verbose && \
+#     cd ../ && \
+#     rm -rf cupy
 
 
 #
