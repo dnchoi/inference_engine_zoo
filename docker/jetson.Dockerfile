@@ -2,10 +2,6 @@ ARG BASE_IMAGE=nvcr.io/nvidia/l4t-base:r32.4.4
 # ARG PYTORCH_IMAGE
 # ARG TENSORFLOW_IMAGE
 
-ARG OPENCV_VERSION=4.5.3
-ARG ONNXRUNTIME_VERSION=1.8.2
-ARG CMALE_VERSION=3.21.1
-
 # FROM ${PYTORCH_IMAGE} as pytorch
 # FROM ${TENSORFLOW_IMAGE} as tensorflow
 FROM ${BASE_IMAGE}
@@ -19,7 +15,6 @@ ENV CUDA_HOME="/usr/local/cuda"
 ENV PATH="/usr/local/cuda/bin:${PATH}"
 ENV LD_LIBRARY_PATH="/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
 ENV LLVM_CONFIG="/usr/bin/llvm-config-9"
-ARG MAKEFLAGS=-j$(nproc) 
 
 RUN printenv
 
@@ -190,6 +185,9 @@ RUN mkdir opencv && \
 # 	echo "allow 10 sec for JupyterLab to start @ http://$(hostname -I | cut -d' ' -f1):8888 (password nvidia)" && \
 # 	echo "JupterLab logging location:  /var/log/jupyter.log  (inside the container)" && \
 # 	/bin/bash
+
+ARG ONNXRUNTIME_VERSION=1.8.2
+ARG MAKEFLAGS=-j$(nproc) 
 
 # Install ONNX Runtime
 RUN pip install pytest==6.2.1 onnx==1.10.1
