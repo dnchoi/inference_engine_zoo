@@ -102,6 +102,7 @@ ARG MAKEFLAGS=6
 RUN cd /tmp && \
     wget https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}.tar.gz \
     tar xvf cmake-${CMAKE_VERSION}.tar.gz \
+    cd cmake-${CMAKE_VERSION} \
     mkdir build ; cd build \
     cmake .. \
     make -j${MAKEFLAGS} \
