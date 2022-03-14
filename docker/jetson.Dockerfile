@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=nvcr.io/nvidia/l4t-base:r32.4.4
+ARG BASE_IMAGE=nvcr.io/nvidia/l4t-base:r32.4.4 as onnxruntime
 # ARG PYTORCH_IMAGE
 # ARG TENSORFLOW_IMAGE
 
@@ -202,18 +202,18 @@ RUN mkdir opencv && \
 ARG ONNXRUNTIME_VERSION=1.8.2
 
 # Install ONNX Runtime
-RUN pip install pytest==6.2.1 onnx==1.10.1
+RUN pip3 install pytest==6.2.1 onnx==1.10.1
 RUN cd /tmp && \
     git clone --recursive --branch v${ONNXRUNTIME_VERSION} https://github.com/Microsoft/onnxruntime && \
     cd onnxruntime && \
     ./build.sh \
         --update \
-        --cuda_home /usr/local/cuda \
-        --cudnn_home /usr/lib/aarch64-linux-gnu/ \
-        --use_cuda \
-        --config RelWithDebInfo \
-        --build_shared_lib \
+        --build \
         --build_wheel \
+        --config RelWithDebInfo \
+        --use_cuda \
+        --cuda_home /usr/local/cuda \
+        --cudnn_home /usr/lib/aarch64-linux-gnu \
         --skip_tests \
         --parallel ${MAKEFLAGS} && \
     cd build/Linux/RelWithDebInfo && \
