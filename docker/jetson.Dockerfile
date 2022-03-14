@@ -78,6 +78,8 @@ RUN apt-get update && \
 		llvm-9-dev \
 		libffi-dev \
 		libsndfile1 \
+        cmake libopenblas-dev \
+	    libpython3.6-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN apt-get clean
@@ -187,7 +189,7 @@ RUN mkdir opencv && \
 # 	/bin/bash
 
 ARG ONNXRUNTIME_VERSION=1.8.2
-ARG MAKEFLAGS=-j$(nproc) 
+ARG MAKEFLAGS=6
 
 # Install ONNX Runtime
 RUN pip install pytest==6.2.1 onnx==1.10.1
@@ -195,10 +197,11 @@ RUN cd /tmp && \
     git clone --recursive --branch v${ONNXRUNTIME_VERSION} https://github.com/Microsoft/onnxruntime && \
     cd onnxruntime && \
     ./build.sh \
+        --update \
         --cuda_home /usr/local/cuda \
         --cudnn_home /usr/lib/aarch64-linux-gnu/ \
         --use_cuda \
-        --config RelWithDebInfo \
+        --config Release \
         --build_shared_lib \
         --build_wheel \
         --skip_tests \
