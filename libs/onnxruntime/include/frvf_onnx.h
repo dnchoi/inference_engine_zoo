@@ -6,6 +6,7 @@
 #include <opencv2/dnn/dnn.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
+#include <opencv2/highgui.hpp>
 #include <chrono>
 #include <cmath>
 #include <exception>
@@ -27,7 +28,7 @@ namespace onnx_frvf{
         Ort::Session *sess;
         Ort::SessionOptions *sessionOptions;
         Ort::AllocatorWithDefaultOptions *allocator;
-        GraphOptimizationLevel optimizer_selector(int expression);
+        inline GraphOptimizationLevel optimizer_selector(int expression);
         
         std::vector<int64_t> inputDims;
         size_t numInputNodes;
@@ -39,13 +40,12 @@ namespace onnx_frvf{
         
         std::vector<const char*> inputNames;
         std::vector<const char*> outputNames;
-        cv::Mat preprocessedImage;
-
-        void _Instance(const char * file_path, bool useCUDA, int OPT_OPTION, int B, int C, int W, int H, char * img_path);
+        inline cv::Mat pre_processing(cv::Mat frame);
+        void _Instance(const char * file_path, bool useCUDA, int OPT_OPTION, int B, int C, int W, int H);
     public:
-        frvf_onnx(const char * file_path, bool useCUDA, int OPT_OPTION, int B, int C, int W, int H, char * img_path);
+        frvf_onnx(const char * file_path, bool useCUDA, int OPT_OPTION, int B, int C, int W, int H);
         ~frvf_onnx();
-        float do_inference();
+        float do_inference(cv::Mat frame);
     };
 }
 

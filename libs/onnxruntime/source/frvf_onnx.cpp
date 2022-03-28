@@ -1,8 +1,6 @@
-
 #include <frvf_onnx.h>
 
 using namespace onnx_frvf;
-cv::Mat resizedImageBGR, resizedImageRGB, resizedImage; 
 
 template <typename T>
 T vectorProduct(const std::vector<T>& v)
@@ -11,7 +9,7 @@ T vectorProduct(const std::vector<T>& v)
 }
 
 template <typename T>
-std::ostream& operator<<(std::ostream& os, const std::vector<T>& v)
+inline std::ostream& operator<<(std::ostream& os, const std::vector<T>& v)
 {
     os << "[";
     for (int i = 0; i < v.size(); ++i)
@@ -27,7 +25,7 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& v)
 }
 
 
-std::ostream& operator<<(std::ostream& os,
+inline std::ostream& operator<<(std::ostream& os,
                          const ONNXTensorElementDataType& type)
 {
     switch (type)
@@ -98,7 +96,8 @@ std::ostream& operator<<(std::ostream& os,
  * @param useCUDA 
  * @param OPT_OPTION 
  */
-frvf_onnx::frvf_onnx(const char * file_path, bool useCUDA, int OPT_OPTION, int B, int C, int W, int H, char * img_path){
+frvf_onnx::frvf_onnx(const char * file_path, bool useCUDA, 
+                     int OPT_OPTION, int B, int C, int W, int H){
     SPDLOG_INFO(file_path);
     SPDLOG_INFO(useCUDA);
     SPDLOG_INFO(OPT_OPTION);
@@ -106,11 +105,11 @@ frvf_onnx::frvf_onnx(const char * file_path, bool useCUDA, int OPT_OPTION, int B
     SPDLOG_INFO(C);
     SPDLOG_INFO(W);
     SPDLOG_INFO(H);
-    SPDLOG_INFO(img_path);
-    this->_Instance(file_path, useCUDA, OPT_OPTION, B, C, W, H, img_path);
+    
+    this->_Instance(file_path, useCUDA, OPT_OPTION, B, C, W, H);
 }
 
-GraphOptimizationLevel frvf_onnx::optimizer_selector(int expression){
+inline GraphOptimizationLevel frvf_onnx::optimizer_selector(int expression){
     GraphOptimizationLevel a;
     switch (expression)
     {
@@ -134,10 +133,9 @@ GraphOptimizationLevel frvf_onnx::optimizer_selector(int expression){
     return a;
 }
 
-void frvf_onnx::_Instance(const char * file_path, bool useCUDA, int OPT_OPTION, int B, int C, int W, int H, char * img_path)
-{
+void frvf_onnx::_Instance(const char * file_path, bool useCUDA, 
+                          int OPT_OPTION, int B, int C, int W, int H){
     std::string modelFilepath(file_path);
-    std::string imageFilepath(img_path);
     SPDLOG_INFO(modelFilepath);
     SPDLOG_INFO(useCUDA);
     SPDLOG_INFO(OPT_OPTION);
@@ -146,9 +144,8 @@ void frvf_onnx::_Instance(const char * file_path, bool useCUDA, int OPT_OPTION, 
     sessionOptions->SetIntraOpNumThreads(1);
     if (useCUDA)
     {
-        // OrtCUDAProviderOptions cuda_options{0};
-        // sessionOptions->AppendExecutionProvider_CUDA(cuda_options);
-        SPDLOG_INFO("Mac OS is not CUDA");
+        OrtCUDAProviderOptions cuda_options{0};
+        sessionOptions->AppendExecutionProvider_CUDA(cuda_options);
     }
     env = new Ort::Env(OrtLoggingLevel::ORT_LOGGING_LEVEL_WARNING, instanceName.c_str());
 
@@ -185,30 +182,6 @@ void frvf_onnx::_Instance(const char * file_path, bool useCUDA, int OPT_OPTION, 
 
     inputNames.push_back(inputName);
     outputNames.push_back(outputName);
-
-
-    if(imageFilepath.find(".") == std::string::npos){
-        cv::Mat channels[C], zeros_mat;
-        for(int num = 0; num < C; num++){
-            channels[num] = cv::Mat::zeros(W, H, CV_32F);
-        }
-        cv::merge(channels, C, zeros_mat);
-
-        zeros_mat.convertTo(resizedImage, CV_32F, 1.0 / 255);
-    }
-    else{        
-        cv::Mat imageBGR = cv::imread(imageFilepath, cv::ImreadModes::IMREAD_COLOR);
-        cv::resize(imageBGR, resizedImageBGR,
-                cv::Size(inputDims.at(2), inputDims.at(3)),
-                cv::InterpolationFlags::INTER_CUBIC);
-        cv::cvtColor(resizedImageBGR, resizedImageRGB,
-                    cv::ColorConversionCodes::COLOR_BGR2RGB);
-        resizedImageRGB.convertTo(resizedImage, CV_32F, 1.0 / 255);
-    }
-
-    cv::dnn::blobFromImage(resizedImage, preprocessedImage);
-    assert((int64_t)W == inputDims.at(2));
-    assert((int64_t)H == inputDims.at(3));
     SPDLOG_INFO("Instance Done");
 
     // cv::Mat channels[3];
@@ -223,13 +196,31 @@ void frvf_onnx::_Instance(const char * file_path, bool useCUDA, int OPT_OPTION, 
     // HWC to CHW
 }
 
-float frvf_onnx::do_inference(){
+inline cv::Mat frvf_onnx::pre_processing(cv::Mat frame){
+    cv::Mat preprocessedImage;
+    cv::Mat resizedImageBGR, resizedImageRGB, resizedImage; 
+
+    cv::resize(frame, resizedImageBGR,
+            cv::Size(inputDims.at(2), inputDims.at(3)),
+            cv::InterpolationFlags::INTER_CUBIC);
+    cv::cvtColor(resizedImageBGR, resizedImageRGB,
+                cv::ColorConversionCodes::COLOR_BGR2RGB);
+    resizedImageRGB.convertTo(resizedImage, CV_32F, 1.0 / 255);
+
+    cv::dnn::blobFromImage(resizedImage, preprocessedImage);
+    assert((int64_t)W == inputDims.at(2));
+    assert((int64_t)H == inputDims.at(3));
+    return preprocessedImage;
+}
+
+float frvf_onnx::do_inference(cv::Mat frame){
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
+    cv::Mat image = pre_processing(frame);
     size_t inputTensorSize = vectorProduct(inputDims);
     std::vector<float> inputTensorValues(inputTensorSize);
-    inputTensorValues.assign(preprocessedImage.begin<float>(),
-                             preprocessedImage.end<float>());
+    inputTensorValues.assign(image.begin<float>(),
+                             image.end<float>());
                              
     size_t outputTensorSize = vectorProduct(outputDims);
     std::vector<float> outputTensorValues(outputTensorSize);
@@ -256,7 +247,6 @@ float frvf_onnx::do_inference(){
     //     SPDLOG_INFO("{}",outputTensorValues.at(_i));
     // }
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-
     float processtime = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
     return processtime;
 }

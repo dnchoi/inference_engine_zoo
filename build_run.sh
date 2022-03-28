@@ -45,7 +45,6 @@ then
     make all
     cd ..
 
-    sleep 2s
     main
 elif [ $BUILD = "run" ]
 then
