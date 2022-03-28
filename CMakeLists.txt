@@ -72,23 +72,23 @@ if(${WITH_INFERENCE_ENGINE} STREQUAL "TENSORRT")
 
     find_path(TENSORRT_INCLUDE_DIR NvInfer.h
     # HINTS ${TENSORRT_ROOT} ${CUDA_TOOLKIT_ROOT_DIR} /usr/include
-    HINTS ${TENSORRT_ROOT} ${CUDA_TOOLKIT_ROOT_DIR} /home/luke/SDK_Tools/TensorRT-7.2.3.4/targets/x86_64-linux-gnu/include
+    HINTS ${TENSORRT_ROOT} ${CUDA_TOOLKIT_ROOT_DIR} ~/SDK_Tools/TensorRT-7.2.3.4/targets/x86_64-linux-gnu/include
     PATH_SUFFIXES include)
     find_path(TENSORRT_INCLUDE_DIR NvInferPlugin.h
     HINTS ${TENSORRT_ROOT} ${CUDA_TOOLKIT_ROOT_DIR}
     PATH_SUFFIXES include)
     MESSAGE(STATUS "Found TensorRT headers at ${TENSORRT_INCLUDE_DIR}")
     find_library(TENSORRT_LIBRARY_INFER nvinfer
-    HINTS ${TENSORRT_ROOT} ${TENSORRT_BUILD} ${CUDA_TOOLKIT_ROOT_DIR} /home/luke/SDK_Tools/TensorRT-7.2.3.4/targets/x86_64-linux-gnu/lib/
+    HINTS ${TENSORRT_ROOT} ${TENSORRT_BUILD} ${CUDA_TOOLKIT_ROOT_DIR} ~/SDK_Tools/TensorRT-7.2.3.4/targets/x86_64-linux-gnu/lib/
     PATH_SUFFIXES lib lib64 lib/x64 lib/aarch64-linux-gnu)
     find_library(TENSORRT_LIBRARY_INFER_PLUGIN nvinfer_plugin
-    HINTS  ${TENSORRT_ROOT} ${TENSORRT_BUILD} ${CUDA_TOOLKIT_ROOT_DIR} /home/luke/SDK_Tools/TensorRT-7.2.3.4/targets/x86_64-linux-gnu/lib/
+    HINTS  ${TENSORRT_ROOT} ${TENSORRT_BUILD} ${CUDA_TOOLKIT_ROOT_DIR} ~/SDK_Tools/TensorRT-7.2.3.4/targets/x86_64-linux-gnu/lib/
     PATH_SUFFIXES lib lib64 lib/x64 lib/aarch64-linux-gnu)
     find_library(TENSORRT_LIBRARY_PARSER nvparsers
-    HINTS  ${TENSORRT_ROOT} ${TENSORRT_BUILD} ${CUDA_TOOLKIT_ROOT_DIR} /home/luke/SDK_Tools/TensorRT-7.2.3.4/targets/x86_64-linux-gnu/lib/
+    HINTS  ${TENSORRT_ROOT} ${TENSORRT_BUILD} ${CUDA_TOOLKIT_ROOT_DIR} ~/SDK_Tools/TensorRT-7.2.3.4/targets/x86_64-linux-gnu/lib/
     PATH_SUFFIXES lib lib64 lib/x64 lib/aarch64-linux-gnu)
     find_library(TENSORRT_LIBRARY_ONNXPARSER nvonnxparser
-    HINTS  ${TENSORRT_ROOT} ${TENSORRT_BUILD} ${CUDA_TOOLKIT_ROOT_DIR} /home/luke/SDK_Tools/TensorRT-7.2.3.4/targets/x86_64-linux-gnu/lib/
+    HINTS  ${TENSORRT_ROOT} ${TENSORRT_BUILD} ${CUDA_TOOLKIT_ROOT_DIR} ~/SDK_Tools/TensorRT-7.2.3.4/targets/x86_64-linux-gnu/lib/
     PATH_SUFFIXES lib lib64 lib/x64 lib/aarch64-linux-gnu)
     set(TENSORRT_LIBRARY ${TENSORRT_LIBRARY_INFER} ${TENSORRT_LIBRARY_INFER_PLUGIN} ${TENSORRT_LIBRARY_PARSER} ${TENSORRT_LIBRARY_ONNXPARSER})
     # message(STATUS "Find TensorRT libs at ${TENSORRT_LIBRARY}")

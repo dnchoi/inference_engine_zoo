@@ -144,8 +144,9 @@ void frvf_onnx::_Instance(const char * file_path, bool useCUDA,
     sessionOptions->SetIntraOpNumThreads(1);
     if (useCUDA)
     {
-        OrtCUDAProviderOptions cuda_options{0};
-        sessionOptions->AppendExecutionProvider_CUDA(cuda_options);
+        // OrtCUDAProviderOptions cuda_options{0};
+        // sessionOptions->AppendExecutionProvider_CUDA(cuda_options);
+        SPDLOG_INFO("Mac OS is not used CUDA");
     }
     env = new Ort::Env(OrtLoggingLevel::ORT_LOGGING_LEVEL_WARNING, instanceName.c_str());
 
