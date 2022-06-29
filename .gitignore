@@ -2,3 +2,4 @@
 *.onnx
 build
 log
+.DS_Store
